@@ -96,8 +96,6 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 			}
 			word = strtok(NULL, " ");
 		}
-		free(word);
-		word = NULL;
 	}
 	fclose(fptr);
 	return true;
@@ -147,8 +145,6 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 			}
 			word = strtok(NULL, " ");
 		}
-		free(word);
-		word = NULL;
 	}
 	return num_misspelled;
 }
