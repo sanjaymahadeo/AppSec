@@ -66,26 +66,24 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	{
 		return false;
 	}
-	int num = 0, x = 0;
-	char letter;
-	char word[LENGTH + 1];
-	while ((letter = getc(fptr)) != EOF)
+	size_t size = 0;
+	char * line = NULL;
+	
+	while (getline(&line, &size, fptr) != -1)
 	{
-		if (letter != ' ' && letter != '\n')
-		{
-			word[x] = letter;
-			x++;
-		}
-		else
+		char * word;
+		word = strtok(line, " ");
+		while (word != NULL)
 		{
 			hashmap_t new_node;
-			new_node = malloc(sizeof(node));
-			//new_node = new_node->next;
+			new_node = malloc(sizeof(node)); //sizeof(node)
 			new_node->next = NULL;
-			for (int j = 0; j < LENGTH + 1; j++)
-			{
-				new_node->word[j] = word[j];
-			}
+			strcpy(new_node->word, word);
+			//for (int j = 0; j < LENGTH; j++)
+			//{
+			//	new_node->word[j] = word[j];
+			//}
+			//new_node->word[min] = '\0';
 			int bucket = hash_function(word);
 			if (hashtable[bucket] == NULL)
 			{
@@ -96,13 +94,10 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 				new_node->next = hashtable[bucket];
 				hashtable[bucket] = new_node;
 			}
-			for (int i = 0; i < LENGTH + 1; i++) // + 1?
-			{
-				word[i] = NULL;
-			}
-			x = 0;
-			num++;
+			word = strtok(NULL, " ");
 		}
+		free(word);
+		word = NULL;
 	}
 	fclose(fptr);
 	return true;
