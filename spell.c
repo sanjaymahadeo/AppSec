@@ -4,41 +4,20 @@
 #include <string.h>
 #include <ctype.h>
 #include "dictionary.h"
-
-
 bool check_word(const char* word, hashmap_t hashtable[])
 {
 	char lower_word[LENGTH + 1];
 	int min;
-	if (strlen(word) < LENGTH)
-	{
-		min = strlen(word);
-	}
-	else
-	{
-		min = LENGTH;
-	}
-
-	for (int j = 0; j < min; j++)	// was LENGTH + 1
+	min = strlen(word);
+	for (int j = 0; j < min; j++)
 	{
 		lower_word[j] = tolower(word[j]);
 	}
-	lower_word[min] = '\0'; //strlen(word)?LENGTH
-	int bucket = hash_function(word);
+
+	lower_word[min] = '\0';
+
+	int bucket = hash_function(lower_word);
 	hashmap_t cursor = hashtable[bucket];
-	while (cursor != NULL)
-	{
-		if (strcmp(cursor->word, word) == 0)
-		{
-			return true;
-		}
-		else
-		{
-			cursor = cursor->next;
-		}
-	}
-		bucket = hash_function(lower_word);
-		cursor = hashtable[bucket];
 	while (cursor != NULL)
 	{
 		if (strcmp(cursor->word, lower_word) == 0)
@@ -56,7 +35,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
 	for (int k = 0; k < HASH_SIZE; k++)
-	{ 
+	{
 		hashtable[k] = NULL;
 	}
 	FILE *fptr;
@@ -68,33 +47,29 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	}
 	size_t size = 0;
 	char * line = NULL;
-	
+
 	while (getline(&line, &size, fptr) != -1)
 	{
-		char * word;
-		word = strtok(line, " ");
-		while (word != NULL)
+		char *word;
+		word = strtok(line, "\n");
+		hashmap_t new_node;
+		new_node = malloc(sizeof(node)); //sizeof(node)
+		new_node->next = NULL;
+		int len = strlen(word);
+		for (int i = 0;i<len;i++)
 		{
-			hashmap_t new_node;
-			new_node = malloc(sizeof(node)); //sizeof(node)
-			new_node->next = NULL;
-			strcpy(new_node->word, word);
-			//for (int j = 0; j < LENGTH; j++)
-			//{
-			//	new_node->word[j] = word[j];
-			//}
-			//new_node->word[min] = '\0';
-			int bucket = hash_function(word);
-			if (hashtable[bucket] == NULL)
-			{
-				hashtable[bucket] = new_node;
-			}
-			else
-			{
-				new_node->next = hashtable[bucket];
-				hashtable[bucket] = new_node;
-			}
-			word = strtok(NULL, " ");
+			new_node->word[i] = tolower(word[i]);
+		}
+		new_node->word[len] = '\0';
+		int bucket = hash_function(new_node->word);
+		if (hashtable[bucket] == NULL)
+		{
+			hashtable[bucket] = new_node;
+		}
+		else
+		{
+			new_node->next = hashtable[bucket];
+			hashtable[bucket] = new_node;
 		}
 	}
 	fclose(fptr);
@@ -115,32 +90,36 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 		word = strtok(line, " ");
 		while (word != NULL)
 		{
-			if (ispunct(word[0]) != 0)
+
+			int len = strlen(word);
+			while (ispunct(word[0]))
 			{
 				for (int j = 0; j < strlen(word) - 1; j++)
 				{
 					word[j] = word[j + 1];
 				}
+				word[len - 1] = '\0';
+				len = strlen(word);
+			}
+			while (ispunct(word[len - 1]) || word[len - 1] == '\n')
+			{
+				word[len - 1] = '\0';
+				len = strlen(word);
 			}
 
-			for (int i = 0; i < strlen(word); i++)
+			for (int j = 0;j<strlen(word);j++)
 			{
-				if ((ispunct(word[i]) != 0))
-				{
-					for (int j = i; j <= strlen(word); j++)
-					{
-						if (word[j + 1] == '\0')// || word[j + 1] == NULL)
-						{
-							word[j] = '\0';
-						}
-					}
-				}
+				word[j] = tolower(word[j]);
 			}
 			if (!check_word(word, hashtable))
 			{
-
-				misspelled[num_misspelled] = malloc(strlen(word));
-				strcpy(misspelled[num_misspelled], word);
+				misspelled[num_misspelled] = malloc(strlen(word) + 1);//strlen(word));
+				int l = 0;
+				for (;l < strlen(word);l++)
+				{
+					misspelled[num_misspelled][l] = word[l];
+				}
+				misspelled[num_misspelled][l] = '\0';
 				num_misspelled++;
 			}
 			word = strtok(NULL, " ");
