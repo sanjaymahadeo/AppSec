@@ -8,7 +8,15 @@ bool check_word(const char* word, hashmap_t hashtable[])
 {
 	char lower_word[LENGTH + 1];
 	int min;
-	min = strlen(word);
+	if (strlen(word) < LENGTH)
+	{
+		min = strlen(word);
+	}
+	else
+	{
+		min = LENGTH;
+	}
+	//word[min] = '\0';
 	for (int j = 0; j < min; j++)
 	{
 		lower_word[j] = tolower(word[j]);
@@ -55,7 +63,15 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 		hashmap_t new_node;
 		new_node = malloc(sizeof(node)); //sizeof(node)
 		new_node->next = NULL;
-		int len = strlen(word);
+		int len;
+		if (strlen(word) < LENGTH)
+		{
+			len = strlen(word);
+		}
+		else
+		{
+			len = LENGTH;
+		}
 		for (int i = 0;i<len;i++)
 		{
 			new_node->word[i] = tolower(word[i]);
