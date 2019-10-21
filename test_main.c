@@ -1,6 +1,9 @@
 #include <check.h>
 #include "dictionary.h"
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #define DICTIONARY "wordlist.txt"
 #define TESTDICT "test_worlist.txt"
@@ -24,6 +27,18 @@ START_TEST(test_check_word_normal)
     ck_assert(check_word(correct_word, hashtable));
     ck_assert(!check_word(punctuation_word_2, hashtable));
     // Test here: What if a word begins and ends with "?
+    if (ispunct(punctuation_word_2[0]) || ispunct(punctuation_word_2[strlen(punctuation_word_2)-1]))
+    {
+        ck_assert(check_word(punctuation_word_2, hashtable));
+    }
+    const char* longer = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"; 
+    ck_assert(check_word(longer, hashtable));
+    const char* stnum = "123456";
+    ck_assert(check_word(stnum, hashtable));
+    int num = 123456;
+    ck_assert(check_word(num, hashtable));
+    const char* mix = "a1c2b3";
+    ck_assert(check_word(mix, hashtable));
 }
 END_TEST
 
@@ -77,4 +92,3 @@ main(void)
     srunner_free(runner);
     return (failed == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
 }
-
